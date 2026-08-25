@@ -1,6 +1,7 @@
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { Component } from '@angular/core';
+import { GifService } from '../../services/gifs';
 import { MenuOption } from '../../interfaces/menu-option.interface';
 
 @Component({
@@ -13,7 +14,7 @@ import { MenuOption } from '../../interfaces/menu-option.interface';
 })
 export class SideMenuOptions {
   //Recibir del padre
-  // menuOptions = input.required<MenuOption[]>();
+  gifsService = inject(GifService);
 
   menuOptions: MenuOption[] = [
     {
@@ -30,4 +31,9 @@ export class SideMenuOptions {
     },
   ];
 
+  // gifsHistory = computed(() => {
+  //   return this.gifsService.searchHistory()
+  // });
+
+  gifsHistoryKeys = this.gifsService.searchHistoryKeys;
 }
