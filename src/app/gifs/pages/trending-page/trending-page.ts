@@ -1,18 +1,28 @@
-import { Component, Inject, computed, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, computed, inject, viewChild } from '@angular/core';
 
-import { GifList } from '../../components/gif-list/gif-list';
 import { GifService } from '../../services/gifs';
+import { ScrollStateService } from '../../../shared/services/scroll-state.service';
 
 @Component({
   selector: 'app-trending-page',
-  imports: [
-    GifList
-  ],
   templateUrl: './trending-page.html',
 })
-export class TrendingPage {
+export class TrendingPage implements AfterViewInit{
   // Inyeccion del servicio
   gifsService = inject(GifService);
+
+  scrollStateService = inject(ScrollStateService);
+
+  scrollDivRef = viewChild<ElementRef<HTMLDivElement>>('groupDiv');
+
+
+  ngAfterViewInit(): void {
+    const scrollDiv = this.scrollDivRef()?.nativeElement;
+    if (!scrollDiv) return;
+
+    scrollDiv.scrollTop = this.scrollStateService.trendingScrollState();
+  }
+
 
   // Acceso a la señal de gifs en el servicio
   readonly gifs = computed(() =>
@@ -20,18 +30,19 @@ export class TrendingPage {
   );
 
 
-  // readonly imageUrls: string[] = [
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-1.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-2.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-3.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-4.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-5.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-6.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-7.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-8.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-9.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-10.jpg",
-  //   "https://flowbite.s3.amazonaws.com/docs/gallery/square/image-11.jpg"
-  // ];
+  onScroll(event: Event) {
+    const scrollDiv = this.scrollDivRef()?.nativeElement;
+    if (!scrollDiv) return;
+
+    const scrollTop = scrollDiv.scrollTop;
+    const clientHeight = scrollDiv.clientHeight;
+    const scrollHeight = scrollDiv.scrollHeight;
+
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+    this.scrollStateService.trendingScrollState.set(scrollTop);
+
+    if (isAtBottom) {
+      this.gifsService.loadTrendingGifs();
+    }
+  }
 }
