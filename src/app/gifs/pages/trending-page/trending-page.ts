@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, Inject, computed, inject, viewChild } from '@angular/core';
 
 import { GifService } from '../../services/gifs';
-import { ScrollStateService } from '../../../shared/services/scroll-state.service';
+import { ScrollStateService } from '../../../shared/services/scroll-state';
 
 @Component({
   selector: 'app-trending-page',
